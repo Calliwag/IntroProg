@@ -107,6 +107,19 @@ int lgStr(vector<int> dice)
     return 0;
 }
 
+int yahtzee(vector<int> dice)
+{
+    if(dice[0] == dice[1] && dice[1] == dice[2] && dice[2] == dice[3] && dice[3] == dice[4])
+    {
+        return 50;
+    }
+}
+
+int chance(vector<int> dice)
+{
+    return dice[0] + dice[1] + dice[2] + dice[3] + dice[4];
+}
+
 int calculateScore(vector<int> dice, int rule)
 {
 
@@ -137,7 +150,7 @@ int calculateScore(vector<int> dice, int rule)
         return scoreSetOf(dice, 4);
 
     case 9:
-        return 0;
+        return -1;
 
     case 10:
         return smStr(dice);
@@ -145,8 +158,16 @@ int calculateScore(vector<int> dice, int rule)
     case 11:
         return lgStr(dice);
 
+    case 12:
+        return yahtzee(dice);
+
+    case 13:
+        return chance(dice);
+
 
     }
+
+    return -1;
 }
 
 int main()
