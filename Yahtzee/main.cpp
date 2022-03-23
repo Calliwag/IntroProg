@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <cstdlib>
 #include <time.h>
@@ -159,10 +160,14 @@ void trackScore(vector<int>& scores, int score, int rule)
     scores[rule-1] = score;
 }
 
-int calculateScore(vector<int> dice, vector<int>& scores, int rule)
+int calculateScore(vector<int> dice, vector<int>& scores, int rule, int yahtzees)
     {
     sort(dice.begin(), dice.end());
 
+    if(yahtzee(dice) == 50 && scores [11] == 50)
+    {
+        yahtzees++;
+    }
     switch (rule)
     {
     case 1:
@@ -249,27 +254,57 @@ int calculateScore(vector<int> dice, vector<int>& scores, int rule)
     return -2;
 }
 
+int calcScore(vector<int> scores, int yahtzee)
+{
+    int score = 0;
+    score = scores[0] + scores[1] + scores[2] + scores[3] + scores[4] + scores[5];
+    if(score >= 63)
+    {
+        score += 35;
+    }
+    score = score + scores[6] + scores[7] + scores[8] + scores[9] + scores[10] + scores[11] + scores[12];
+    score = score + (yahtzee * 100);
+    return score;
+}
+
+void scoreSheet(vector<int> scores)
+{
+    int sp = 15;
+    cout<<"       Yahtzee Score Sheet"<< endl << endl;
+    cout<< setw(sp) <<"Ones"<<" | "<<(scores[0] == -1 ? "-" : to_string(scores[0]))<< endl;
+    cout<< setw(sp) <<"Twos"<<" | "<<(scores[1] == -1 ? "-" : to_string(scores[1]))<< endl;
+    cout<< setw(sp) <<"Threes"<<" | "<<(scores[2] == -1 ? "-" : to_string(scores[2]))<< endl;
+    cout<< setw(sp) <<"Fours"<<" | "<<(scores[3] == -1 ? "-" : to_string(scores[3]))<< endl;
+    cout<< setw(sp) <<"Fives"<<" | "<<(scores[4] == -1 ? "-" : to_string(scores[4]))<< endl;
+    cout<< setw(sp) <<"Sixes"<<" | "<<(scores[5] == -1 ? "-" : to_string(scores[5]))<< endl;
+    cout<< setw(sp) <<"Three of a Kind"<<" | "<<(scores[6] == -1 ? "-" : to_string(scores[6]))<< endl;
+    cout<< setw(sp) <<"Four of a Kind"<<" | "<<(scores[7] == -1 ? "-" : to_string(scores[7]))<< endl;
+    cout<< setw(sp) <<"Full House"<<" | "<<(scores[8] == -1 ? "-" : to_string(scores[8]))<< endl;
+    cout<< setw(sp) <<"Small Straight"<<" | "<<(scores[9] == -1 ? "-" : to_string(scores[9]))<< endl;
+    cout<< setw(sp) <<"Large Straight"<<" | "<<(scores[10] == -1 ? "-" : to_string(scores[10]))<< endl;
+    cout<< setw(sp) <<"Yahtzee"<<" | "<<(scores[11] == -1 ? "-" : to_string(scores[11]))<< endl;
+    cout<< setw(sp) <<"Chance"<<" | "<<(scores[12] == -1 ? "-" : to_string(scores[12]))<< endl;
+}
+
 int main()
 {
     vector<int> scores{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int yahtzee = 0;
     srand(time(NULL));
-//    cout << "1 2 3 4 5" << endl;
-//    cout << calculateScore({1,2,3,4,5}, scores, 10) << endl;
-//    cout << "5 4 3 2 1" << endl;
-//    cout << calculateScore({5,4,3,2,1}, scores, 10) << endl;
-//    cout << "1 1 1 1 1" << endl;
-//    cout << calculateScore({1,1,1,1,1}, scores, 10) << endl;
-//    cout << "2 3 3 4 5" << endl;
-//    cout << calculateScore({2,3,3,4,5}, scores, 10) << endl;
-//    cout << "5 3 4 2 3" << endl;
-//    cout << calculateScore({5,3,4,2,3}, scores, 10) << endl;
-
+    cout << "Rules:" << endl <<"1 : Ones"<< endl <<"2 : Twos"<< endl <<"3 : Threes"<< endl <<"4 : Fours"<< endl <<"5 : Fives"<< endl <<"6 : Sixes"<< endl <<"7 : Three of a Kind"<< endl <<"8 : Four of a Kind"<< endl <<"9 : Full House"<< endl <<"10 : Small Straight"<< endl <<"11 : Large Straight"<< endl <<"12 : Yahtzee"<< endl <<"13 : Chance"<< endl;
     for(int i = 0; i < 13; i ++)
     {
         vector<int> dice{0,0,0,0,0};
         roll(dice);
-        cout << calculateScore(dice, scores, i+1) << endl;
+        displayDice(dice);
+        reroller(dice);
+        cout <<"What rule would you like to use?"<< endl;
+        int rule;
+        cin >> rule;
+        calculateScore(dice, scores, rule, yahtzee);
+        scoreSheet(scores);
     }
+    cout << calcScore(scores, yahtzee) << endl;
 
 
     return 0;
