@@ -254,6 +254,137 @@ int calculateScore(vector<int> dice, vector<int>& scores, int rule, int yahtzees
     return -2;
 }
 
+int calculateScoreNoTrack(vector<int> dice, vector<int>& scores, int rule, int yahtzees)
+    {
+    sort(dice.begin(), dice.end());
+
+    if(yahtzee(dice) == 50 && scores [11] == 50)
+    {
+        yahtzees++;
+    }
+    switch (rule)
+    {
+    case 1:
+        if(scores[0] == -1)
+        {
+            return scoreTop(dice,1);
+        }
+        else
+        {
+            return -2;
+        }
+    case 2:
+        if(scores[1] == -1)
+        {
+            return scoreTop(dice,2);
+        }
+        else
+        {
+            return -2;
+        }
+    case 3:
+        if(scores[2] == -1)
+        {
+            return scoreTop(dice,3);
+        }
+        else
+        {
+            return -2;
+        }
+    case 4:
+        if(scores[3] == -1)
+        {
+            return scoreTop(dice,4);
+        }
+        else
+        {
+            return -2;
+        }
+    case 5:
+        if(scores[4] == -1)
+        {
+            return scoreTop(dice,5);
+        }
+        else
+        {
+            return -2;
+        }
+    case 6:
+        if(scores[5] == -1)
+        {
+            return scoreTop(dice, 6);
+        }
+        else
+        {
+            return -2;
+        }
+    case 7:
+        if(scores[6] == -1)
+        {
+            return scoreSetOf(dice, 3);
+        }
+        else
+        {
+            return -2;
+        }
+    case 8:
+        if(scores[7] == -1)
+        {
+            return scoreSetOf(dice, 4);
+        }
+        else
+        {
+            return -2;
+        }
+    case 9:
+        if(scores[8] == -1)
+        {
+            return fullHouse(dice);
+        }
+        else
+        {
+            return -2;
+        }
+    case 10:
+        if(scores[9] == -1)
+        {
+            return smStr(dice);
+        }
+        else
+        {
+            return -2;
+        }
+    case 11:
+        if(scores[10] == -1)
+        {
+            return lgStr(dice);
+        }
+        else
+        {
+            return -2;
+        }
+    case 12:
+        if(scores[11] == -1)
+        {
+            return yahtzee(dice);
+        }
+        else
+        {
+            return -2;
+        }
+    case 13:
+        if(scores[12] == -1)
+        {
+            return chance(dice);
+        }
+        else
+        {
+            return -2;
+        }
+
+    }
+}
+
 int calcScore(vector<int> scores, int yahtzee)
 {
     int score = 0;
@@ -283,7 +414,7 @@ void scoreSheet(vector<int> scores)
     cout<< setw(sp) <<"Small Straight"<<" | "<<(scores[9] == -1 ? "-" : to_string(scores[9]))<< endl;
     cout<< setw(sp) <<"Large Straight"<<" | "<<(scores[10] == -1 ? "-" : to_string(scores[10]))<< endl;
     cout<< setw(sp) <<"Yahtzee"<<" | "<<(scores[11] == -1 ? "-" : to_string(scores[11]))<< endl;
-    cout<< setw(sp) <<"Chance"<<" | "<<(scores[12] == -1 ? "-" : to_string(scores[12]))<< endl;
+    cout<< setw(sp) <<"Chance"<<" | "<<(scores[12] == -1 ? "-" : to_string(scores[12]))<< endl << endl;
 }
 
 int main()
@@ -298,13 +429,25 @@ int main()
         roll(dice);
         displayDice(dice);
         reroller(dice);
-        cout <<"What rule would you like to use?"<< endl;
-        int rule;
-        cin >> rule;
-        calculateScore(dice, scores, rule, yahtzee);
-        scoreSheet(scores);
+        int t = 1;
+        while(t == 1)
+        {
+            cout <<"What rule would you like to use?"<< endl;
+            int rule;
+            cin >> rule;
+            if(calculateScoreNoTrack(dice, scores, rule, yahtzee) != -2)
+            {
+                calculateScore(dice, scores, rule, yahtzee);
+                scoreSheet(scores);
+                t--;
+            }
+            else
+            {
+                cout <<"Rule already used!"<< endl;
+            }
+        }
     }
-    cout << calcScore(scores, yahtzee) << endl;
+    cout <<"Your final score is "<< calcScore(scores, yahtzee) << endl;
 
 
     return 0;
