@@ -32,10 +32,10 @@ void reroller(vector<int>& dice)
     for(int i = 0; i < 2; i++)
     {
         vector<bool> reroll{false,false,false,false,false};
-        bool toRoll;
-        cout << "Would you like to reroll (type 1 for yes or 0 for no)?" << endl;
+        string toRoll;
+        cout << "Would you like to reroll (y/n)?" << endl;
         cin >> toRoll;
-        if(toRoll == false)
+        if(toRoll == "n")
         {
             break;
         }
