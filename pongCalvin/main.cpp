@@ -35,8 +35,6 @@ int main()
     while (g.draw())
     {
         g.cout << setw(33) << botscore <<"   : "<< setw(3) << playscore;
-        //double test = (playscore - botscore)/10;
-        //ballvel.x = 4 + test;
         int playertop = player.y+linel;
         int playerbot = player.y-linel;
         int bottop = bot.y+linel;
@@ -105,6 +103,15 @@ int main()
         {
             ballvel.y *= -1;
         }
+        double test = (playscore - botscore)/10;
+        if(ballvel.x < 0)
+        {
+            ballvel.x = -(4 + test);
+        }
+        if(ballvel.x > 0)
+        {
+            ballvel.x = 4 + test;
+        }
         if((ballpos.y >= playerbot && ballpos.y <= playertop) && (ballpos.x == player.x-3))
         {
             ballvel.x *= -1;
@@ -122,7 +129,23 @@ int main()
             freezecount ++;
             g.line(ballpos,ballpos+5*ballvel);
         }
+        if(playscore == 20 || botscore == 20)
+        {
+            break;
+        }
 
+
+    }
+    while(g.draw())
+    {
+        if(botscore == 20)
+        {
+            g.cout << "You Lost!!1!!11!11";
+        }
+        else if(playscore == 20)
+        {
+            g.cout << "You Won.";
+        }
     }
 
     return 0;
