@@ -7,7 +7,6 @@ using namespace mssm;
 
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
-
 void drawTable(vector<vector<int>> board, Graphics& g)
 {
 
@@ -28,11 +27,55 @@ void drawTable(vector<vector<int>> board, Graphics& g)
     }
 }
 
+void drawTableAdvance(vector<vector<int>> board, Graphics& g, int x, int y)
+{
+
+    for(int iy = 0; iy < 6; iy++)
+    {
+        for(int ix = 0; ix < 7; ix++)
+        {
+            if(board[ix][iy] == 1)
+            {
+                g.ellipse({ix*x/7+x/14,iy*y/7+3*y/14}, y/7, x/7, YELLOW, YELLOW);
+            }
+            if(board[ix][iy] == 2)
+            {
+                g.ellipse({ix*x/7+x/14,iy*y/7+3*y/14}, y/7, x/7, RED, RED);
+            }
+        }
+        g.cout << endl;
+    }
+}
+
+int drop(int& currentColumn, vector<vector<int>>& board, int& currentPlayer)
+{
+
+    int lastPlace = -1;
+
+    for(int i = 0; i < 6; i++)
+    {
+        if(board[currentColumn][i] == 0)
+        {
+            lastPlace = i;
+        }
+        else
+        {
+            break;
+        }
+    }
+    if(lastPlace == -1)
+    {
+        return 0;
+    }
+    board[currentColumn][lastPlace] = currentPlayer + 1;
+    return 1;
+}
+
 int main()
 {
 
-    int x = 800;
-    int y = 800;
+    int x = 600;
+    int y = 600;
     Graphics g("Test", x, y);
 
     vector<vector<int>> board;
@@ -47,57 +90,39 @@ int main()
     {
         for(int iy = 0; iy < 6; iy++)
         {
-            board[ix][iy] = ix*iy;
+            board[ix][iy] = 0;
         }
     }
 
-    Vec2d current{x/16,y/16};
+    Vec2d current{x/14,y/14};
     int currentPlayer = 0;
+
+    Color currentColor = YELLOW;
+
+    int currentColumn = 0;
 
     while (g.draw())
     {
-        //        for(int iy = 0; iy < 6; iy++)
-        //        {
-        //            for(int ix = 0; ix < 7; ix++)
-        //            {
-        //                if(board[ix][iy] >= 10)
-        //                {
-        //                    g.cout << "   " << board[ix][iy];
-        //                }
-        //                else
-        //                {
-        //                    g.cout << "     " << board[ix][iy];
-        //                }
-        //            }
-        //            g.cout << endl;
-        //        }
+
+        drawTableAdvance(board, g, x, y);
 
         if(currentPlayer == 0)
         {
-            Color currentColor = YELLOW;
+            currentColor = YELLOW;
         }
 
-        if(currentPlayer == 1)
+        else if(currentPlayer == 1)
         {
-            Color currentColor = RED;
+            currentColor = RED;
         }
 
         for(int i = 1; i < 8; i++)
         {
-            g.line({i*x/8, 0},{i*x/8,y});
-            g.line({0,i*y/8},{x,i*y/8});
+            g.line({i*x/7, 0},{i*x/7,y});
+            g.line({0,i*y/7},{x,i*y/7});
         }
 
-        g.ellipse(current, x/8, y/8);
-
-        //        if (g.isKeyPressed(Key::Left) && !(current.x < x/16))
-        //        {
-        //            current.x -= x/8;
-        //        }
-        //        if (g.isKeyPressed(Key::Right) && !(current.x > 15*x/16))
-        //        {
-        //            current.x += x/8;
-        //        }
+        g.ellipse(current, x/7, y/7, currentColor);
 
         for (const Event& e : g.events())
         {
@@ -108,12 +133,20 @@ int main()
 
                 if(e.arg == static_cast<int>(Key::Left))
                 {
-                    current.x -= x/8;
+                    current.x -= x/6.98;
+                    currentColumn --;
                 }
 
                 if(e.arg == static_cast<int>(Key::Right))
                 {
-                    current.x += x/8;
+                    current.x += x/6.98;
+                    currentColumn ++;
+                }
+
+                if(e.arg == static_cast<int>(Key::Down))
+                {
+                    drop(currentColumn, board, currentPlayer);
+                    currentPlayer = -currentPlayer + 1;
                 }
 
                 break;
