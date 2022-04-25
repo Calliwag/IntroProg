@@ -47,7 +47,7 @@ void drawTableAdvance(vector<vector<int>> board, Graphics& g, int x, int y)
     }
 }
 
-int drop(int& currentColumn, vector<vector<int>>& board, int& currentPlayer)
+int drop(int& currentColumn, vector<vector<int>>& board, int& currentPlayer, int& dropX, int& dropY)
 {
 
     int lastPlace = -1;
@@ -68,11 +68,179 @@ int drop(int& currentColumn, vector<vector<int>>& board, int& currentPlayer)
         return 0;
     }
     board[currentColumn][lastPlace] = currentPlayer + 1;
+    dropX = currentColumn;
+    dropY = lastPlace;
     return 1;
+}
+
+int checkWin(vector<vector<int>> board, int currentPlayer, int x, int y)
+{
+    int c = currentPlayer + 1;
+
+
+    if(board[x][y+1] == c && board[x][y+2] == c && board[x][y+3] == c)
+    {
+        return 1;
+    }
+
+
+    if(x == 0)
+    {
+        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        {
+            return 1;
+        }
+
+        else
+        {
+            return 0;
+        }
+    }
+
+    if(x == 1)
+    {
+        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
+        {
+            return 1;
+        }
+
+        else
+        {
+            return 0;
+        }
+    }
+
+    if(x == 2)
+    {
+        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-2][y] == c && board[x-1][y] == c && board[x+1][y] == c)
+        {
+            return 1;
+        }
+
+        else
+        {
+            return 0;
+        }
+    }
+
+    if(x == 3)
+    {
+        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-2][y] == c && board[x-1][y] == c && board[x+1][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-3][y] == c && board[x-2][y] == c && board[x-1][y] == c)
+        {
+            return 1;
+        }
+
+        else
+        {
+            return 0;
+        }
+    }
+
+    if(x == 4)
+    {
+        if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-2][y] == c && board[x-1][y] == c && board[x+1][y] == c)
+        {
+            return 1;
+        }
+
+        else if(board[x-3][y] == c && board[x-2][y] == c && board[x-1][y] == c)
+        {
+            return 1;
+        }
+
+        else
+        {
+            return 0;
+        }
+    }
+
+//    if(x < 3)
+//    {
+//        if(board[x-1][y] == c && board[x-2][y] == c && board[x-3][y] == c)
+//        {
+//            return 1;
+//        }
+//    }
+
+//    else if(board[x-1][y+1] == c && board[x-2][y+2] == c && board[x-3][y+3] == c)
+//    {
+//        return 1;
+//    }
+
+
+
+//    else if(board[x+1][y+1] == c && board[x+2][y+2] == c && board[x+3][y+3] == c)
+//    {
+//        return 1;
+//    }
+
+//    else if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+//    {
+//        return 1;
+//    }
+
+//    else if(board[x+1][y-1] == c && board[x+2][y-2] == c && board[x+3][y-3] == c)
+//    {
+//        return 1;
+//    }
+
+//    else if(board[x][y-1] == c && board[x][y-2] == c && board[x][y-3] == c)
+//    {
+//        return 1;
+//    }
+
+//    else if(board[x-1][y-1] == c && board[x-2][y-2] == c && board[x-3][y-3] == c)
+//    {
+//        return 1;
+//    }
+
+
+      return 0;
+
 }
 
 int main()
 {
+    int dropX = 0;
+    int dropY = 0;
+
+    int winner;
+    bool win = 0;
 
     int x = 600;
     int y = 600;
@@ -122,7 +290,7 @@ int main()
             g.line({0,i*y/7},{x,i*y/7});
         }
 
-        g.ellipse(current, x/7, y/7, currentColor);
+        g.ellipse(current, x/7, y/7, currentColor, currentColor);
 
         for (const Event& e : g.events())
         {
@@ -145,7 +313,13 @@ int main()
 
                 if(e.arg == static_cast<int>(Key::Down))
                 {
-                    drop(currentColumn, board, currentPlayer);
+                    drop(currentColumn, board, currentPlayer, dropX, dropY);
+
+                    if(checkWin(board, currentPlayer, dropX, dropY) == 1)
+                    {
+                        win = 1;
+                        winner = currentPlayer;
+                    }
                     currentPlayer = -currentPlayer + 1;
                 }
 
@@ -161,6 +335,10 @@ int main()
             default:
                 break;
             }
+        }
+        if(win == 1)
+        {
+            break;
         }
 
     }
