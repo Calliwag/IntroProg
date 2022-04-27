@@ -73,165 +73,70 @@ int drop(int& currentColumn, vector<vector<int>>& board, int& currentPlayer, int
     return 1;
 }
 
-int checkWin(vector<vector<int>> board, int currentPlayer, int x, int y)
+int checkNorth(vector<vector<int>> b, int currentPlayer, int x, int y)
 {
     int c = currentPlayer + 1;
 
-
-    if(board[x][y+1] == c && board[x][y+2] == c && board[x][y+3] == c)
+    if(y <= 2)
     {
-        return 1;
-    }
-
-
-    if(x == 0)
-    {
-        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        if(b[x][y+1] == c && b[x][y+2] == c && b[x][y+3] == c)
         {
             return 1;
-        }
-
-        else
-        {
-            return 0;
         }
     }
+    return 0;
+}
 
-    if(x == 1)
+int checkEastWest(vector<vector<int>> b, int currentPlayer)
+{
+    int c = currentPlayer + 1;
+    int count;
+
+    for(int ix = 0; ix < 7; ix++)
     {
-        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        count = 0;
+        for(int iy = 0; iy < 6; iy++)
         {
-            return 1;
-        }
-
-        else if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
-        {
-            return 1;
-        }
-
-        else
-        {
-            return 0;
+            if(b[ix][iy] == c)
+            {
+                count++;
+            }
+            if(count == 4)
+            {
+                return 1;
+            }
         }
     }
+    return 0;
+}
 
-    if(x == 2)
+int checkDiag(vector<vector<int>> b, int currentPlayer)
+{
+    int c = currentPlayer + 1;
+
+    for(int ix = 0; ix < 4; ix++)
     {
-        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        for(int iy = 0; iy < 3; iy++)
         {
-            return 1;
-        }
-
-        else if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
-        {
-            return 1;
-        }
-
-        else if(board[x-2][y] == c && board[x-1][y] == c && board[x+1][y] == c)
-        {
-            return 1;
-        }
-
-        else
-        {
-            return 0;
+            if(b[ix][iy] == c && b[ix+1][iy+1] == c && b[ix+2][iy+2] == c && b[ix+3][iy+3] == c)
+            {
+                return 1;
+            }
         }
     }
 
-    if(x == 3)
+    for(int ix = 0; ix < 4; ix++)
     {
-        if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
+        for(int iy = 5; iy > 2; iy--)
         {
-            return 1;
-        }
-
-        else if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
-        {
-            return 1;
-        }
-
-        else if(board[x-2][y] == c && board[x-1][y] == c && board[x+1][y] == c)
-        {
-            return 1;
-        }
-
-        else if(board[x-3][y] == c && board[x-2][y] == c && board[x-1][y] == c)
-        {
-            return 1;
-        }
-
-        else
-        {
-            return 0;
+            if(b[ix][iy] == c && b[ix+1][iy-1] == c && b[ix+2][iy-2] == c && b[ix+3][iy-3] == c)
+            {
+                return 1;
+            }
         }
     }
 
-    if(x == 4)
-    {
-        if(board[x-1][y] == c && board[x+1][y] == c && board[x+2][y] == c)
-        {
-            return 1;
-        }
-
-        else if(board[x-2][y] == c && board[x-1][y] == c && board[x+1][y] == c)
-        {
-            return 1;
-        }
-
-        else if(board[x-3][y] == c && board[x-2][y] == c && board[x-1][y] == c)
-        {
-            return 1;
-        }
-
-        else
-        {
-            return 0;
-        }
-    }
-
-//    if(x < 3)
-//    {
-//        if(board[x-1][y] == c && board[x-2][y] == c && board[x-3][y] == c)
-//        {
-//            return 1;
-//        }
-//    }
-
-//    else if(board[x-1][y+1] == c && board[x-2][y+2] == c && board[x-3][y+3] == c)
-//    {
-//        return 1;
-//    }
-
-
-
-//    else if(board[x+1][y+1] == c && board[x+2][y+2] == c && board[x+3][y+3] == c)
-//    {
-//        return 1;
-//    }
-
-//    else if(board[x+1][y] == c && board[x+2][y] == c && board[x+3][y] == c)
-//    {
-//        return 1;
-//    }
-
-//    else if(board[x+1][y-1] == c && board[x+2][y-2] == c && board[x+3][y-3] == c)
-//    {
-//        return 1;
-//    }
-
-//    else if(board[x][y-1] == c && board[x][y-2] == c && board[x][y-3] == c)
-//    {
-//        return 1;
-//    }
-
-//    else if(board[x-1][y-1] == c && board[x-2][y-2] == c && board[x-3][y-3] == c)
-//    {
-//        return 1;
-//    }
-
-
-      return 0;
-
+    return 0;
 }
 
 int main()
@@ -294,7 +199,6 @@ int main()
 
         for (const Event& e : g.events())
         {
-            g.cerr << e << endl;
             switch (e.evtType)
             {
             case EvtType::KeyPress:
@@ -315,7 +219,17 @@ int main()
                 {
                     drop(currentColumn, board, currentPlayer, dropX, dropY);
 
-                    if(checkWin(board, currentPlayer, dropX, dropY) == 1)
+                    if(checkEastWest(board, currentPlayer) == 1)
+                    {
+                        win = 1;
+                        winner = currentPlayer;
+                    }
+                    if(checkNorth(board, currentPlayer, dropX, dropY) == 1)
+                    {
+                        win = 1;
+                        winner = currentPlayer;
+                    }
+                    if(checkDiag(board, currentPlayer) == 1)
                     {
                         win = 1;
                         winner = currentPlayer;
