@@ -92,14 +92,18 @@ int checkEastWest(vector<vector<int>> b, int currentPlayer)
     int c = currentPlayer + 1;
     int count;
 
-    for(int ix = 0; ix < 7; ix++)
+    for(int iy = 0; iy < 6; iy++)
     {
         count = 0;
-        for(int iy = 0; iy < 6; iy++)
+        for(int ix = 0; ix < 7; ix++)
         {
             if(b[ix][iy] == c)
             {
                 count++;
+            }
+            else
+            {
+                count = 0;
             }
             if(count == 4)
             {
@@ -255,6 +259,17 @@ int main()
             break;
         }
 
+    }
+    while(g.draw())
+    {
+        if(winner == 0)
+        {
+            g.text({x/2,y/2},36,"Yellow Wins!");
+        }
+        else if(winner == 1)
+        {
+            g.text({x/2,y/2},36,"Red Wins!");
+        }
     }
 
 }
