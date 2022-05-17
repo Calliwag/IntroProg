@@ -24,7 +24,7 @@ void ship::draw(Graphics& g)
 
     g.polygon({ship[0],ship[1],ship[2],ship[3],ship[0]}, WHITE);
 
-//    g.cout << vel.magnitude();
+    //    g.cout << vel.magnitude();
 }
 
 void ship::update(Graphics& g)
@@ -56,161 +56,148 @@ void ship::update(Graphics& g)
         angle += .1;
     }
 
+    if(pos.x > g.width()+5)
+    {
+        pos.x = -5;
+    }
+    else if(pos.x < -5)
+    {
+        pos.x = g.width()+5;
+    }
+
+    if(pos.y > g.height()+5)
+    {
+        pos.y = -5;
+    }
+    else if(pos.y < -5)
+    {
+        pos.y = g.height()+5;
+    }
+
     pos += vel;
 }
 
 class ast
 {
 public:
-    Vec2d pos{300,300};
-    Vec2d vel{0.1,0.1};
-    vector<Vec2d> points{{20,20},{0,40},{-20,20},{-40,0},{-20,-20},{0,-40},{20,-20},{40,0}};
-    double size = 10;
-    int invincible = 0;
+    Vec2d pos{0,0};
+    Vec2d vel{0,0};
+    double width = 10;
 
-    void draw(Graphics& g);
     void update(Graphics& g);
-    bool edgeCol(Graphics& g);
+    void draw(Graphics& g);
 };
-
-void ast::draw(Graphics& g)
-{
-
-    vector<Vec2d> pointS = points;
-
-    for(int i = 0; i < points.size(); i++)
-    {
-        pointS[i].x = points[i].x+pos.x;
-        pointS[i].y = points[i].y+pos.y;
-    }
-
-    pointS.push_back(pointS[0]);
-
-    g.polygon(pointS, WHITE);
-
-}
 
 void ast::update(Graphics& g)
 {
     pos += vel;
-
-    double avg = 0;
-
-    for(int i = 0; i < points.size(); i++)
+    if(pos.x > g.width()+width/2)
     {
-        avg += points[i].magnitude();
+        pos.x = -width/2;
+    }
+    else if(pos.x < -width/2)
+    {
+        pos.x = g.width()+width/2;
     }
 
-    avg /= points.size();
-
-    size = avg;
-
-    invincible--;
-
+    if(pos.y > g.height()+width/2)
+    {
+        pos.y = -width/2;
+    }
+    else if(pos.y < -width/2)
+    {
+        pos.y = g.height()+width/2;
+    }
 }
 
-
-
-bool colDet1(ast Ast, ship p)
+void ast::draw(Graphics& g)
 {
-    if((p.pos-Ast.pos).magnitude() <= Ast.size)
+    g.ellipse(pos,width,width);
+}
+
+class boolet
+{
+public:
+    Vec2d pos{0,0};
+    Vec2d vel{0,0};
+    double width = 1;
+    int lifetime = 1000;
+
+    void update(Graphics& g);
+    void draw(Graphics& g);
+};
+
+void boolet::update(Graphics& g)
+{
+    pos += vel;
+    if(pos.x > g.width()+width/2)
+    {
+        pos.x = -width/2;
+    }
+    else if(pos.x < -width/2)
+    {
+        pos.x = g.width()+width/2;
+    }
+
+    if(pos.y > g.height()+width/2)
+    {
+        pos.y = -width/2;
+    }
+    else if(pos.y < -width/2)
+    {
+        pos.y = g.height()+width/2;
+    }
+    lifetime --;
+}
+
+void boolet::draw(Graphics& g)
+{
+    g.ellipse(pos,width,width);
+}
+
+void createAst(Graphics& g, vector<ast>& asts, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        Vec2d pos{g.randomInt(0,g.width()),g.randomInt(0,g.height())};
+        Vec2d vel{g.randomDouble(-1,1),g.randomDouble(-1,1)};
+
+        ast newAst;
+        newAst.pos=pos;
+        newAst.vel=vel;
+
+        asts.push_back(newAst);
+    }
+}
+
+void createBoolet(vector<boolet>& boolets, ship player)
+{
+    Vec2d pos{player.pos.x+10*cos(player.angle),player.pos.y+10*sin(player.angle)};
+    Vec2d vel{cos(player.angle),sin(player.angle)};
+    vel += player.vel;
+
+    boolet newBoolet;
+    newBoolet.pos=pos;
+    newBoolet.vel=vel;
+
+    boolets.push_back(newBoolet);
+}
+bool astast(ast ast1, ast ast2)
+{
+    if((ast1.pos-ast2.pos).magnitude() <= (ast1.width+ast2.width)/2)
     {
         return 1;
     }
     return 0;
 }
 
-void splitR(Graphics& g,vector<ast>& asts, int n, ship pl)
+bool shipast(ast ast, ship ship)
 {
-
-    int lowScore = 1000;
-
-    int p = 0;
-
-    for(int i = 2; i < asts[n].points.size() - 2; i++)
+    if((ast.pos-ship.pos).magnitude() <= ast.width/2)
     {
-        if((pl.pos-(asts[n].points[i]+asts[n].pos)).magnitude() < lowScore)
-        {
-            p = i;
-            lowScore = (pl.pos-(asts[n].points[i]+asts[n].pos)).magnitude();
-        }
+        return 1;
     }
-
-    vector<Vec2d> ast1;
-    ast1.resize(p);
-    vector<Vec2d> ast2;
-    ast2.resize(2+asts[n].points.size()-p);
-
-    for(int i = 0; i < p; i++)
-    {
-        ast1[i]=asts[n].points[i];
-    }
-    for(int i = p; i < asts[n].points.size(); i++)
-    {
-        ast2[i]=asts[n].points[i];
-    }
-
-    ast2.pop_back();
-    ast2.pop_back();
-
-    Vec2d vel1 = {g.randomDouble(-1,1),g.randomDouble(-1,1)};
-    Vec2d vel2 = -1*vel1;
-
-//    Vec2d offset = {g.randomDouble(-10,10),g.randomDouble(-10,10)};
-    Vec2d offset = {0,0};
-    Vec2d avg1;
-    for(int i = 0; i < ast1.size(); i++)
-    {
-        avg1 += ast1[i];
-    }
-
-    avg1 = avg1*(1/ast1.size());
-
-    Vec2d avg2;
-    for(int i = 0; i < ast2.size(); i++)
-    {
-        avg2 += ast2[i];
-    }
-
-    avg2 = avg2*(1/ast2.size());
-
-    Vec2d pos1 = asts[n].pos + offset;
-    Vec2d pos2 = asts[n].pos - offset;
-
-    asts.erase(asts.begin()+5);
-
-//    for(int i = n+1; i < asts.size(); i++)
-//    {
-//        ast tast = asts[i];
-//        asts[i] = asts[i-1];
-//        asts[i-1] = tast;
-//    }
-
-//    asts.pop_back();
-
-    int invincible = 60;
-
-    ast astf1;
-    astf1.vel = vel1;
-    astf1.pos = pos1;
-    astf1.points = ast1;
-    astf1.invincible = invincible;
-
-    ast astf2;
-    astf2.vel = vel2;
-    astf2.pos = pos2;
-    astf2.points = ast2;
-    astf2.invincible = invincible;
-
-    if(astf1.points.size() > 3)
-    {
-        asts.push_back(astf1);
-    }
-    if(astf2.points.size() > 3)
-    {
-        asts.push_back(astf2);
-    }
-
+    return 0;
 }
 
 int main()
@@ -219,56 +206,53 @@ int main()
 
     ship player;
 
-    ast Ast;
-
-    Ast.points = {};
-
-    for(double a = 0; a < 100; a += 3.1415/100)
-    {
-        Ast.points.push_back({50*cos(a),50*sin(a)});
-    }
-
-    vector<ast> asts{Ast};
+    vector<ast> asts;
+    vector<boolet> boolets;
+\
+    createAst(g, asts, 10);
 
     while (g.draw()) {
 
         player.update(g);
         player.draw(g);
 
+        for(int i = 0; i < boolets.size(); i++)
+        {
+            boolets[i].update(g);
+            boolets[i].draw(g);
+        }
+
         for(int i = 0; i < asts.size(); i++)
         {
-            asts[i].draw(g);
             asts[i].update(g);
+            asts[i].draw(g);
         }
 
-
-
-        g.cout << colDet1(Ast, player);
-        for(int i = 0; i < asts.size(); i++)
+        if(g.isKeyPressed(' '))
         {
-            if(colDet1(asts[i],player) && asts[i].invincible < 0)
-            {
-                splitR(g, asts, i, player);
-            }
+            createBoolet(boolets, player);
         }
-//        for (const Event& e : g.events()) {
-//            g.cerr << e << endl;
 
-//            switch (e.evtType) {
-//            case EvtType::KeyPress:
-//                break;
-//            case EvtType::KeyRelease:
-//                break;
-//            case EvtType::MouseMove:
-//                break;
-//            case EvtType::MousePress:
-//                break;
-//            case EvtType::MouseRelease:
-//                break;
-//            default:
-//                break;
-//            }
-//        }
+        g.cout << g.isKeyPressed(' ') <<" : "<< boolets.size();
+
+        //        for (const Event& e : g.events()) {
+        //            g.cerr << e << endl;
+
+        //            switch (e.evtType) {
+        //            case EvtType::KeyPress:
+        //                break;
+        //            case EvtType::KeyRelease:
+        //                break;
+        //            case EvtType::MouseMove:
+        //                break;
+        //            case EvtType::MousePress:
+        //                break;
+        //            case EvtType::MouseRelease:
+        //                break;
+        //            default:
+        //                break;
+        //            }
+        //        }
     }
 
     return 0;
