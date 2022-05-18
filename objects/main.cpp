@@ -112,15 +112,18 @@ int collide(vector<objct>& objcts, vector<vector<int>>& col)
                 objcts[ix].vel += dirX*xFrac;
                 objcts[iy].vel += dirY*yFrac;
 
+                xFrac *= pow(objcts[ix].width,2)*objcts[ix].massMult/(pow(objcts[iy].width,2)*objcts[iy].massMult);
+                yFrac *= pow(objcts[iy].width,2)*objcts[iy].massMult/(pow(objcts[ix].width,2)*objcts[ix].massMult);
+
                 double finVel = objcts[ix].vel.magnitude() + objcts[iy].vel.magnitude();
 
                 double mult = (initVel/finVel);
 
-//                if((objcts[ix].massMult > 0) && (objcts[iy].massMult > 0))
-//                {
+                if(mult > 0)
+                {
                     objcts[ix].vel = objcts[ix].vel * mult;
                     objcts[iy].vel = objcts[iy].vel * mult;
-//                }
+                }
 
 //                dirX = objcts[ix].vel*(1/(objcts[ix].vel.magnitude()+.000001));
 //                dirY = objcts[iy].vel*(1/(objcts[iy].vel.magnitude()+.000001));
@@ -279,9 +282,9 @@ int main()
         objcts[i].vel = objcts[i].vel*(g.randomDouble(1,1)/objcts[i].vel.magnitude());
     }
 
-    objcts[n-1].vel = objcts[n-1].vel*100;
+    objcts[n-1].vel = objcts[n-1].vel*10;
 //    objcts[n-1].vel = {0,1};
-    objcts[n-1].massMult=1000000000;
+    objcts[n-1].massMult=100;
     objcts[n-1].color = BLUE;
 
 //    vector<int> graph{};
