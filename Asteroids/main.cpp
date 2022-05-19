@@ -1,4 +1,4 @@
-#include <iostream>
+ #include <iostream>
 #include "graphics.h"
 
 using namespace std;
@@ -88,6 +88,10 @@ public:
     Vec2d vel{0,0};
     double width = 100;
     int protection = 100;
+    double angle = 0;
+    double angleVel = .0;
+    vector<vector<double>> points{{0,100},{3.14/2,100},{3.14,100},{3.14*3/2,100}};
+    vector<Vec2d> Points{};
 
     void update(Graphics& g);
     void draw(Graphics& g);
@@ -115,17 +119,28 @@ void ast::update(Graphics& g)
     }
 
     protection --;
+
+    angle+= angleVel;
 }
 
 void ast::draw(Graphics& g)
 {
-    g.ellipse(pos,width,width);
+//    g.ellipse(pos,width,width);
+    Points = {};
+    for(int i = 0; i < points.size(); i++)
+    {
+        Points.push_back({width/2*cos(points[i][0]+angle)+pos.x,width/2*sin(points[i][0]+angle)+pos.y});
+    }
+    Points.push_back(Points[0]);
+
+    g.polygon(Points, WHITE);
 }
 
 class boolet
 {
 public:
     Vec2d pos{0,0};
+    Vec2d lastPos{0,0};
     Vec2d vel{0,0};
     double width = 1;
     int lifetime = 1000;
@@ -136,23 +151,28 @@ public:
 
 void boolet::update(Graphics& g)
 {
+    lastPos = pos;
     pos += vel;
     if(pos.x > g.width()+width/2)
     {
-        pos.x = -width/2;
+//        pos.x = -width/2;
+        pos = {-100,-100};
     }
     else if(pos.x < -width/2)
     {
-        pos.x = g.width()+width/2;
+//        pos.x = g.width()+width/2;
+        pos = {-100,-100};
     }
 
     if(pos.y > g.height()+width/2)
     {
-        pos.y = -width/2;
+//        pos.y = -width/2;
+        pos = {-100,-100};
     }
     else if(pos.y < -width/2)
     {
-        pos.y = g.height()+width/2;
+//        pos.y = g.height()+width/2;
+        pos = {-100,-100};
     }
     lifetime --;
 }
@@ -167,7 +187,8 @@ void createAst(Graphics& g, vector<ast>& asts, int n)
     for(int i = 0; i < n; i++)
     {
         Vec2d pos{g.randomInt(0,g.width()),g.randomInt(0,g.height())};
-        Vec2d vel{g.randomDouble(-1,1),g.randomDouble(-1,1)};
+//        Vec2d vel{g.randomDouble(-1,1),g.randomDouble(-1,1)};
+        Vec2d vel{0,0};
 
         ast newAst;
         newAst.pos=pos;
@@ -180,7 +201,7 @@ void createAst(Graphics& g, vector<ast>& asts, int n)
 void createBoolet(vector<boolet>& boolets, ship player)
 {
     Vec2d pos{player.pos.x+10*cos(player.angle),player.pos.y+10*sin(player.angle)};
-    Vec2d vel{cos(player.angle),sin(player.angle)};
+    Vec2d vel{3*cos(player.angle),3*sin(player.angle)};
     vel += player.vel;
 
     boolet newBoolet;
@@ -210,16 +231,27 @@ bool shipast(ast ast, ship ship)
 
 bool boolast(ast ast, boolet boolet)
 {
-    if((ast.pos-boolet.pos).magnitude() <= ast.width/2)
+    if((ast.pos-boolet.pos).magnitude() <= ast.width)
     {
-        return 1;
+        for(int i = 0; i < ast.Points.size() - 1; i++)
+        {
+            double dist1 = (boolet.pos-ast.Points[i]).magnitude();
+            double dist2 = (boolet.pos-ast.Points[i+1]).magnitude();
+
+            double dist = (ast.Points[i]-ast.Points[i+1]).magnitude();
+
+            if(dist1+dist2 <= sqrt(pow(dist/2,2)+pow(ast.vel.magnitude(),2))*2.01)
+            {
+                return 1;
+            }
+        }
     }
     return 0;
 }
 
 void split2(Graphics& g, vector<ast>& asts, int n)
 {
-    if(asts[n].width > 25 && asts[n].protection <= 0)
+    if(asts[n].width > 12 && asts[n].protection <= 0)
     {
         Vec2d vel1 = {g.randomDouble(-1,1),g.randomDouble(-1,1)};
         Vec2d vel2 = -1*vel1;
@@ -288,7 +320,7 @@ int main()
 
     createAst(g, asts, 10);
 
-    int lifetime = 10;
+    int lifetime = 0;
 
     while (g.draw()) {
 
@@ -312,13 +344,11 @@ int main()
             if(lifetime <= 0)
             {
                 createBoolet(boolets, player);
-                lifetime = 10;
-            }
-            else
-            {
-                lifetime--;
+                lifetime = 25  ;
             }
         }
+
+        lifetime--;
 
         for(int a = 0; a < asts.size(); a++)
         {
