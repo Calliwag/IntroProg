@@ -12,6 +12,8 @@ public:
     double angle = 0;
     Vec2d pos{200,200};
     Vec2d vel{0,0};
+    int lives = 3;
+    int invuln = 75;
 
     void draw(Graphics& g);
     void update(Graphics& g);
@@ -75,6 +77,8 @@ void ship::update(Graphics& g)
     }
 
     pos += vel;
+
+    invuln --;
 }
 
 class ast
@@ -82,7 +86,8 @@ class ast
 public:
     Vec2d pos{0,0};
     Vec2d vel{0,0};
-    double width = 10;
+    double width = 100;
+    int protection = 100;
 
     void update(Graphics& g);
     void draw(Graphics& g);
@@ -108,6 +113,8 @@ void ast::update(Graphics& g)
     {
         pos.y = g.height()+width/2;
     }
+
+    protection --;
 }
 
 void ast::draw(Graphics& g)
@@ -182,6 +189,7 @@ void createBoolet(vector<boolet>& boolets, ship player)
 
     boolets.push_back(newBoolet);
 }
+
 bool astast(ast ast1, ast ast2)
 {
     if((ast1.pos-ast2.pos).magnitude() <= (ast1.width+ast2.width)/2)
@@ -193,11 +201,80 @@ bool astast(ast ast1, ast ast2)
 
 bool shipast(ast ast, ship ship)
 {
-    if((ast.pos-ship.pos).magnitude() <= ast.width/2)
+    if((ast.pos-ship.pos).magnitude() <= ast.width/2 && ship.invuln <= 0)
     {
         return 1;
     }
     return 0;
+}
+
+bool boolast(ast ast, boolet boolet)
+{
+    if((ast.pos-boolet.pos).magnitude() <= ast.width/2)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void split2(Graphics& g, vector<ast>& asts, int n)
+{
+    if(asts[n].width > 25 && asts[n].protection <= 0)
+    {
+        Vec2d vel1 = {g.randomDouble(-1,1),g.randomDouble(-1,1)};
+        Vec2d vel2 = -1*vel1;
+        vel1 += asts[n].vel;
+        vel2 += asts[n].vel;
+
+        int newWidth = asts[n].width/2;
+
+        Vec2d pos = asts[n].pos;
+
+        ast ast1;
+        ast1.width=newWidth;
+        ast1.vel=vel1;
+        ast1.pos=pos;
+
+        ast ast2;
+        ast2.width=newWidth;
+        ast2.vel=vel2;
+        ast2.pos=pos;
+
+        asts.erase(asts.begin() + n);
+//        asts[n].width = 0;
+
+        asts.push_back(ast1);
+        asts.push_back(ast2);
+    }
+    else
+    {
+        asts.erase(asts.begin() + n);
+//        asts[n].width = 0;
+    }
+}
+
+void deleteBoolet(vector<boolet>& boolets, int n)
+{
+    boolets.erase(boolets.begin() + n);
+}
+
+void playerDeath(Graphics& g, ship& player, vector<ast>& asts )
+{
+    int count = -1;
+    while(count != 0)
+    {
+        player.pos = {g.randomInt(0,g.width()),g.randomInt(0,g.height())};
+        count = 0;
+        for(int i = 0; i < asts.size(); i++)
+        {
+            if(shipast(asts[i], player))
+            {
+                count ++;
+            }
+        }
+    }
+    player.lives --;
+    player.invuln = 75;
 }
 
 int main()
@@ -208,8 +285,10 @@ int main()
 
     vector<ast> asts;
     vector<boolet> boolets;
-\
+
     createAst(g, asts, 10);
+
+    int lifetime = 10;
 
     while (g.draw()) {
 
@@ -230,10 +309,44 @@ int main()
 
         if(g.isKeyPressed(' '))
         {
-            createBoolet(boolets, player);
+            if(lifetime <= 0)
+            {
+                createBoolet(boolets, player);
+                lifetime = 10;
+            }
+            else
+            {
+                lifetime--;
+            }
         }
 
-        g.cout << g.isKeyPressed(' ') <<" : "<< boolets.size();
+        for(int a = 0; a < asts.size(); a++)
+        {
+            for(int b = 0; b < boolets.size(); b++)
+            {
+                if(boolast(asts[a],boolets[b]))
+                {
+                    split2(g, asts, a);
+                    a--;
+                    deleteBoolet(boolets, b);
+                    b--;
+                }
+            }
+        }
+
+        for(int a = 0; a < asts.size(); a++)
+        {
+            if(shipast(asts[a], player))
+            {
+                playerDeath(g, player, asts);
+                if(player.lives <= 0)
+                {
+                    return 0;
+                }
+            }
+        }
+
+        g.cout << "Lives: " << player.lives;
 
         //        for (const Event& e : g.events()) {
         //            g.cerr << e << endl;
